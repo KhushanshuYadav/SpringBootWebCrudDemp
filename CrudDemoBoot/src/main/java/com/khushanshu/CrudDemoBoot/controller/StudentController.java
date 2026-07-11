@@ -1,8 +1,8 @@
-package com.khushanshu.CrudDemoBoot.Controller;
+package com.khushanshu.CrudDemoBoot.controller;
 
 
-import com.khushanshu.CrudDemoBoot.Entity.Student;
-import com.khushanshu.CrudDemoBoot.Service.StudentService;
+import com.khushanshu.CrudDemoBoot.entity.Student;
+import com.khushanshu.CrudDemoBoot.service.StudentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +13,8 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/students")
 public class StudentController {
+
+    //todo implement soft delete
 
     private StudentService studentService;
 
@@ -53,6 +55,13 @@ public class StudentController {
     @DeleteMapping("/delete")
     public ResponseEntity<String> deleteStudent(@RequestParam long id){
         Boolean isDeleted = studentService.deleteStudent(id);
+
+        return isDeleted?ResponseEntity.ok("Record deleted"):ResponseEntity.notFound().build();
+    }
+
+    @PatchMapping("/soft-delete")
+    public ResponseEntity<String> softDeleteStudent(@RequestParam long id){
+        Boolean isDeleted = studentService.deleteStudentSoftly(id);
 
         return isDeleted?ResponseEntity.ok("Record deleted"):ResponseEntity.notFound().build();
     }

@@ -1,18 +1,32 @@
-package com.khushanshu.CrudDemoBoot.Entity;
+package com.khushanshu.CrudDemoBoot.entity;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
 @Entity
 public class Student {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
-    private int age;
+    private Integer age;
     private String email;
-    private int rollNo;
+    private Integer rollNo;
     private String subject;
+    private Boolean status;
+
+
+    public Boolean getStatus() {
+        return status;
+    }
+
+    public void setStatus(Boolean status) {
+        this.status = status;
+    }
+
 
     public Long getId() {
         return id;

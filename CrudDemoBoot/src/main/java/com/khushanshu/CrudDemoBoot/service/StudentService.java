@@ -1,11 +1,15 @@
 package com.khushanshu.CrudDemoBoot.service;
 
+import com.khushanshu.CrudDemoBoot.dto.StudentCreateRequestDto;
+import com.khushanshu.CrudDemoBoot.dto.StudentCreateResponseDto;
+import com.khushanshu.CrudDemoBoot.dto.StudentUpdateRequestDto;
+import com.khushanshu.CrudDemoBoot.dto.StudentUpdateResponseDto;
 import com.khushanshu.CrudDemoBoot.entity.Student;
+import com.khushanshu.CrudDemoBoot.exception.DuplicateResourceException;
+import com.khushanshu.CrudDemoBoot.exception.ResourceNotFoundException;
 import com.khushanshu.CrudDemoBoot.repository.StudentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
 
 @Service
 public class StudentService {
@@ -13,54 +17,48 @@ public class StudentService {
     @Autowired
     private StudentRepository studentRepository;
 
-    public Student insertStudent(Student student) {
+    public StudentCreateResponseDto insertStudent(StudentCreateRequestDto studentCreateRequestDto) {
+
+        if (studentRepository.existsByEmail(studentCreateRequestDto.getEmail())) throw new DuplicateResourceException("Student with email " + studentCreateRequestDto.getEmail() + " already exists");
+
+        Student student =StudentServiceUtils.mapToEntity(studentCreateRequestDto);
 
         student.setStatus(true);
 
-        return studentRepository.save(student);
+        return StudentServiceUtils.mapToDto(studentRepository.save(student));
 
     }
 
-    public Optional<Student> selectStudent(Long id) {
+    public StudentCreateResponseDto selectStudent(Long id) {
 
-        return studentRepository.findByIdAndStatusIsTrue(id);
+
+        return StudentServiceUtils.mapToDto(studentRepository.findByIdAndStatusIsTrue(id).orElseThrow( ()->new ResourceNotFoundException("Student not found with id = "+id)));
 
     }
 
-    public Student updateStudent(Long id, Student studentReq) {
+    public StudentUpdateResponseDto updateStudent(Long id, StudentUpdateRequestDto studentUpdateRequestDto) {
 
-        if (studentRepository.findByIdAndStatusIsTrue(id).isEmpty()) {
-            return null;
-        }
-
-        studentReq.setId(id);
-        studentReq.setStatus(true);
-        return studentRepository.save(studentReq);
+        Student student =studentRepository.findByIdAndStatusIsTrue(id).orElseThrow(()->new ResourceNotFoundException("Student not found with id = "+id));
+        StudentServiceUtils.mapToEntity(studentUpdateRequestDto, student);
+        student.setId(id);
+        student.setStatus(true);
+        return StudentServiceUtils.mapToUpdateDto(studentRepository.save(student));
     }
 
 
-    public Boolean deleteStudent(Long id) {
+    public void deleteStudent(Long id) {
 
-        if(studentRepository.existsById(id)){
-            studentRepository.deleteById(id);
-            return true;
-        }
-        return false;
+        Student student=studentRepository.findById(id).orElseThrow(()->new ResourceNotFoundException("Student not found with id = "+id));
+        studentRepository.delete(student);
+
 
     }
     
-    public Boolean deleteStudentSoftly(Long id){
+    public void deleteStudentSoftly(Long id){
 
-        if (!studentRepository.existsByIdAndStatusIsTrue(id)) {
-            return false;
-        }
-
-        Optional<Student> student=studentRepository.findByIdAndStatusIsTrue(id);
-        Student studentToSave=student.get();
-        studentToSave.setStatus(false);
-        studentRepository.save(studentToSave);
-        return true;
-
+        Student student=studentRepository.findByIdAndStatusIsTrue(id).orElseThrow(()->new ResourceNotFoundException("Student not found with id = "+id));
+        student.setStatus(false);
+        studentRepository.save(student);
 
     }
 }

@@ -23,10 +23,18 @@ public class AuthenticationFilter implements Filter {
         HttpServletRequest httpServletRequest=(HttpServletRequest) request;
         HttpServletResponse httpServletResponse=(HttpServletResponse) response;
 
-        String code =httpServletRequest.getHeader("code");
+        String code =httpServletRequest.getHeader("token");
+
 
         if(code==null || !code.equals("123")) {
+
+            //adding header before as on return we cannot change response
             httpServletResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            httpServletResponse.setContentType("application/json");
+            httpServletResponse.getWriter().write("""
+                    {
+                       "message" : "Ineligible User"
+                    }""");
             return;
         }
 

@@ -26,6 +26,7 @@ public class StudentServiceUtils {
 
     public static StudentCreateResponseDto mapToDto(Student student) {
         return new StudentCreateResponseDto(
+                student.getId(),
                 student.getName(),
                 student.getAge(),
                 student.getEmail(),
